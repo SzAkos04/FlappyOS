@@ -8,7 +8,7 @@ struct IDTEntry {
     uint8_t __ignored;
     uint8_t type;
     uint16_t offset_high;
-} PACKED;
+} __attribute__((packed));
 
 struct IDTPointer {
     uint16_t limit;
@@ -20,7 +20,7 @@ static struct {
     struct IDTPointer pointer;
 } idt;
 
-extern void idt_load();
+extern void idt_load(uintptr_t);
 
 void idt_set(uint8_t index, void (*base)(struct Registers *), uint16_t selector,
              uint8_t flags) {
@@ -28,7 +28,11 @@ void idt_set(uint8_t index, void (*base)(struct Registers *), uint16_t selector,
         .offset_low = ((uintptr_t)base) & 0xFFFF,
         .offset_high = (((uintptr_t)base) >> 16) & 0xFFFF,
         .selector = selector,
-        .type = flags | 0x60,
+        // FIX: removed | 0x60 which was incorrectly setting DPL to ring 3,
+        // making all interrupts user-callable. flags already carries the
+        // correct descriptor type and DPL from the caller (e.g. 0x8E = kernel
+        // gate).
+        .type = flags,
         .__ignored = 0,
     };
 }

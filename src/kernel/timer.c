@@ -23,7 +23,11 @@ uint32_t timer_get(void) { return state.ticks; }
 
 static void timer_handler(struct Registers *regs) {
     state.ticks++;
-    outportb(0x20, 0x20); // send EOI to Master PIC
+    // FIX: removed manual EOI (outportb(0x20, 0x20)). The irq stub in irq.c
+    // already sends EOI for every IRQ after calling the handler. Sending it
+    // twice was de-syncing the PIC and could cause missed or spurious
+    // interrupts.
+    (void)regs;
 }
 
 void timer_init(void) {

@@ -7,6 +7,7 @@
 #include <cmath.h>
 #include <cstdbool.h>
 #include <cstdint.h>
+#include <cstring.h>
 
 #define VIDEO_ADDRESS 0xa0000
 
@@ -20,7 +21,7 @@
 
 point_t point_new(int x, int y) { return (point_t){x, y}; }
 
-uint8_t back_buf[SCREEN_HEIGHT][SCREEN_WIDTH];
+uint8_t *back_buf = (uint8_t *)0x100000;
 
 static inline bool in_bound(point_t p) {
     return p.x >= 0 && p.x < SCREEN_WIDTH && p.y >= 0 && p.y < SCREEN_HEIGHT;
@@ -49,7 +50,10 @@ void screen_init() {
     outportb(PALETTE_DATA, DAC_MAX);
 }
 
-static inline void putpixel(point_t p, uint8_t VGA_COLOR) {
+// FIX: was `static inline` declared in the header with no body there, which is
+// wrong. It is now a plain (non-inline) function matching the header
+// declaration, so all translation units that call it link correctly.
+void putpixel(point_t p, uint8_t VGA_COLOR) {
     if (!in_bound(p)) {
         return;
     }
@@ -61,7 +65,7 @@ void draw_pixel(point_t p, uint8_t VGA_COLOR) {
     if (!in_bound(p)) {
         return;
     }
-    back_buf[p.y][p.x] = VGA_COLOR;
+    back_buf[p.y * SCREEN_WIDTH + p.x] = VGA_COLOR;
 }
 
 void fill_screen(uint8_t VGA_COLOR) {
@@ -145,12 +149,13 @@ void print_string(const char *str, point_t p, uint8_t VGA_COLOR) {
     }
 }
 
-void clear_buffer(void) { fill_screen(BLACK); }
+void clear_buffer(void) {
+    // Use memset on the whole back buffer at once — faster than fill_screen's
+    // nested loop calling draw_pixel for every pixel.
+    memset(back_buf, BLACK, SCREEN_WIDTH * SCREEN_HEIGHT);
+}
 
 void swap_buffers(void) {
-    for (int y = 0; y < SCREEN_HEIGHT; y++) {
-        for (int x = 0; x < SCREEN_WIDTH; x++) {
-            putpixel(point_new(x, y), back_buf[y][x]);
-        }
-    }
+    uint8_t *video = (uint8_t *)VIDEO_ADDRESS;
+    memcpy(video, back_buf, SCREEN_WIDTH * SCREEN_HEIGHT);
 }

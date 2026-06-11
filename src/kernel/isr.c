@@ -63,6 +63,8 @@ static void (*stubs[NUM_ISRS])(struct Registers *) = {
     _isr40, _isr41, _isr42, _isr43, _isr44, _isr45, _isr46, _isr47,
 };
 
+// FIX: array was 32 entries but only 30 were initialised, causing out-of-bounds
+// reads for exceptions 30 and 31. Now all 32 entries are explicitly provided.
 static const char *exceptions[32] = {
     "Divide by zero",
     "Debug",
@@ -83,23 +85,20 @@ static const char *exceptions[32] = {
     "Coprocessor fault",
     "Alignment check",
     "Machine check",
+    "SIMD floating-point exception",
+    "Virtualization exception",
+    "Control protection exception",
     "RESERVED",
     "RESERVED",
     "RESERVED",
     "RESERVED",
     "RESERVED",
     "RESERVED",
-    "RESERVED",
-    "RESERVED",
-    "RESERVED",
-    "RESERVED",
+    "Hypervisor injection exception",
+    "VMM communication exception",
+    "Security exception",
     "RESERVED",
 };
-
-static struct {
-    size_t index;
-    void (*stub)(struct Registers *);
-} isrs[NUM_ISRS];
 
 static void (*handlers[NUM_ISRS])(struct Registers *) = {0};
 
@@ -118,10 +117,11 @@ static void exception_handler(struct Registers *regs) {
 }
 
 void isr_init(void) {
+    // FIX: removed the redundant `isrs[]` struct array that was just an
+    // unnecessary layer of indirection over `stubs[]`. Now iterate stubs[]
+    // directly.
     for (size_t i = 0; i < NUM_ISRS; i++) {
-        isrs[i].index = i;
-        isrs[i].stub = stubs[i];
-        idt_set(isrs[i].index, isrs[i].stub, 0x08, 0x8E);
+        idt_set(i, stubs[i], 0x08, 0x8E);
     }
 
     for (size_t i = 0; i < 32; i++) {

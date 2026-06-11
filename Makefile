@@ -24,15 +24,11 @@ all: build
 
 build: $(ISO)
 
-# create the final bootable `build/boot/boot.iso` file
-$(ISO): $(BUILD_DIR)/bootloader.bin $(BUILD_DIR)/kernel.bin
+$(ISO): $(BUILD_DIR)/kernel.bin
 	@mkdir -p $(@D)
-	cat $^ > $@
-
-# compile the bootloader
-$(BUILD_DIR)/bootloader.bin: $(BOOTLOADER)
-	@mkdir -p $(@D)
-	$(ASM) -f bin $< -o $@
+	$(eval SECTORS:= $(shell python3 -c "import math; print(math.ceil($(shell wc -c < $<) / 512))"))
+	$(ASM) -f bin -DKERNEL_SECTORS=$(SECTORS) $(BOOTLOADER) -o $(BUILD_DIR)/bootloader.bin
+	cat $(BUILD_DIR)/bootloader.bin $< > $@
 
 # compile the kernel entry
 $(BUILD_DIR)/kernel_entry.o: $(KERNEL_ENTRY)
@@ -64,4 +60,5 @@ run: $(ISO)
 
 clean:
 	rm -rf $(BUILD_DIR)
+
 

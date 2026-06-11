@@ -38,12 +38,16 @@ typedef struct {
 } point_t;
 point_t point_new(int x, int y);
 
-extern uint8_t back_buf[SCREEN_HEIGHT][SCREEN_WIDTH];
+extern uint8_t *back_buf;
 
 void screen_init(void);
 
-// only used to draw to the front buffer
-static inline void putpixel(point_t p, uint8_t VGA_COLOR);
+// FIX: was declared `static inline` here with no body, which is only valid if
+// every translation unit that includes this header also provides a definition —
+// which they don't. The definition lives in screen.c, so this is a plain
+// declaration. Internal callers in screen.c can still be inlined by the
+// compiler via the definition there.
+void putpixel(point_t p, uint8_t VGA_COLOR);
 
 void draw_pixel(point_t p, uint8_t VGA_COLOR);
 

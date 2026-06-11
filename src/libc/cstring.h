@@ -3,5 +3,6 @@
 #include <cstdint.h>
 
 size_t strlen(const char *str);
-void memset(void *dst, uint8_t value, size_t n);
-char *utoa(uint32_t value, char *buffer);
+void   memset(void *dst, uint8_t value, size_t n);
+void  *memcpy(void *dst, const void *src, size_t n);
+char  *utoa(uint32_t value, char *buffer);

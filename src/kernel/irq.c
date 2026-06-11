@@ -40,14 +40,14 @@ static void irq_remap(void) {
     outportb(PIC1_DATA, PIC1_OFFSET);
     outportb(PIC2_DATA, PIC2_OFFSET);
     outportb(PIC1_DATA, 0x04); // PIC2 at IRQ2
-    outportb(PIC2_DATA, 0x02); // Cascade indentity
+    outportb(PIC2_DATA, 0x02); // Cascade identity
     outportb(PIC1_DATA, PIC_MODE_8086);
     outportb(PIC2_DATA, PIC_MODE_8086);
     outportb(PIC1_DATA, mask1);
     outportb(PIC2_DATA, mask2);
 }
 
-static void irq_set_mask(size_t i) {
+void irq_set_mask(size_t i) {
     uint16_t port = i < 8 ? PIC1_DATA : PIC2_DATA;
     uint8_t value = inportb(port) | (1 << i);
     outportb(port, value);
@@ -61,10 +61,18 @@ static void irq_clear_mask(size_t i) {
 
 void irq_install(size_t i, void (*handler)(struct Registers *)) {
     CLI();
+    // FIX: previously irq_clear_mask was called before the handler was stored,
+    // creating a window where the IRQ line was live but irq_handlers[i] was
+    // still NULL. The handler is now registered before the line is unmasked.
     irq_handlers[i] = handler;
     irq_clear_mask(i);
-    // BUG: for some reason it only works if the interrupts are turned off
+    STI();
+}
 
+void irq_uninstall(size_t i) {
+    CLI();
+    irq_set_mask(i);
+    irq_handlers[i] = 0;
     STI();
 }
 
