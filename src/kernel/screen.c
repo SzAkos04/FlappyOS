@@ -50,9 +50,6 @@ void screen_init() {
     outportb(PALETTE_DATA, DAC_MAX);
 }
 
-// FIX: was `static inline` declared in the header with no body there, which is
-// wrong. It is now a plain (non-inline) function matching the header
-// declaration, so all translation units that call it link correctly.
 void putpixel(point_t p, uint8_t VGA_COLOR) {
     if (!in_bound(p)) {
         return;

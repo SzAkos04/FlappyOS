@@ -61,9 +61,6 @@ static void irq_clear_mask(size_t i) {
 
 void irq_install(size_t i, void (*handler)(struct Registers *)) {
     CLI();
-    // FIX: previously irq_clear_mask was called before the handler was stored,
-    // creating a window where the IRQ line was live but irq_handlers[i] was
-    // still NULL. The handler is now registered before the line is unmasked.
     irq_handlers[i] = handler;
     irq_clear_mask(i);
     STI();

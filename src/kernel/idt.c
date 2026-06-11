@@ -28,10 +28,6 @@ void idt_set(uint8_t index, void (*base)(struct Registers *), uint16_t selector,
         .offset_low = ((uintptr_t)base) & 0xFFFF,
         .offset_high = (((uintptr_t)base) >> 16) & 0xFFFF,
         .selector = selector,
-        // FIX: removed | 0x60 which was incorrectly setting DPL to ring 3,
-        // making all interrupts user-callable. flags already carries the
-        // correct descriptor type and DPL from the caller (e.g. 0x8E = kernel
-        // gate).
         .type = flags,
         .__ignored = 0,
     };

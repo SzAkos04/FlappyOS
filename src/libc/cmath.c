@@ -161,10 +161,6 @@ double log(double x) {
 
 double log10(double x) { return (x > 0) ? log(x) / log(10.0) : NAN; }
 
-// FIX: the old implementation did `x *= x` (squaring x each step) instead of
-// multiplying by the original base, giving wrong results for any exponent > 2.
-// Also only handled integer exponents. Rewritten using exp/log for correctness
-// across all real exponents, with a fast-path integer loop for whole numbers.
 double pow(double base, double exp_val) {
     if (exp_val == 0.0) {
         return 1.0;
@@ -172,7 +168,6 @@ double pow(double base, double exp_val) {
     if (base == 0.0) {
         return 0.0;
     }
-    // Integer exponent fast path
     int e = (int)exp_val;
     if ((double)e == exp_val) {
         double result = 1.0;
@@ -183,7 +178,6 @@ double pow(double base, double exp_val) {
         }
         return result;
     }
-    // General case: base^exp = e^(exp * ln(base))
     if (base < 0.0) {
         return NAN;
     }
@@ -195,8 +189,6 @@ double sin(double x) {
     double x_power = x;
     double sign = 1.0;
 
-    // FIX: was hardcoded to 100 iterations while every other trig function uses
-    // TERMS. Unified to TERMS for consistency and to avoid wasted iterations.
     for (int n = 0; n < TERMS; n++) {
         result += sign * x_power / factorial(2 * n + 1);
         x_power *= -x * x;

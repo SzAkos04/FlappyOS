@@ -63,8 +63,6 @@ static void (*stubs[NUM_ISRS])(struct Registers *) = {
     _isr40, _isr41, _isr42, _isr43, _isr44, _isr45, _isr46, _isr47,
 };
 
-// FIX: array was 32 entries but only 30 were initialised, causing out-of-bounds
-// reads for exceptions 30 and 31. Now all 32 entries are explicitly provided.
 static const char *exceptions[32] = {
     "Divide by zero",
     "Debug",
@@ -113,13 +111,10 @@ void isr_handler(struct Registers *regs) {
 }
 
 static void exception_handler(struct Registers *regs) {
-    panic(exceptions[regs->int_no]);
+    panic(exceptions[regs->int_no], regs);
 }
 
 void isr_init(void) {
-    // FIX: removed the redundant `isrs[]` struct array that was just an
-    // unnecessary layer of indirection over `stubs[]`. Now iterate stubs[]
-    // directly.
     for (size_t i = 0; i < NUM_ISRS; i++) {
         idt_set(i, stubs[i], 0x08, 0x8E);
     }

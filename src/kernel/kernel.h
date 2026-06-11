@@ -1,3 +1,5 @@
 #pragma once
 
-void panic(const char *);
+#include "isr.h"
+
+void panic(const char *msg, struct Registers *regs);

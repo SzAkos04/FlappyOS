@@ -15,8 +15,6 @@ void memset(void *dst, uint8_t value, size_t n) {
     }
 }
 
-// FIX: memcpy was missing entirely. Added to support swap_buffers row copy in
-// screen.c and for general use throughout the kernel.
 void *memcpy(void *dst, const void *src, size_t n) {
     uint8_t *d = dst;
     const uint8_t *s = src;
