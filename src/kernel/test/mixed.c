@@ -3,7 +3,7 @@
 #include "../font.h"
 #include "../screen.h"
 
-void mixed_screen(void) {
+void mixed_screen_render(void) {
     draw_rect(point_new(25, 50), point_new(75, 100), MAGENTA);
     draw_line(point_new(25, 50), point_new(50, 75), BLUE);
     draw_line(point_new(25, 100), point_new(50, 125), GREEN);

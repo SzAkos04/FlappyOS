@@ -47,3 +47,20 @@ char *utoa(uint32_t value, char *buffer) {
     buffer[j] = '\0';
     return buffer;
 }
+
+char *strcpy(char *dst, const char *src) {
+    char *orig_dst = dst;
+    while ((*dst++ = *src++)) {
+    }
+    return orig_dst;
+}
+
+char *strcat(char *dst, const char *src) {
+    char *orig_dst = dst;
+    while (*dst) {
+        dst++;
+    }
+    while ((*dst++ = *src++)) {
+    }
+    return orig_dst;
+}

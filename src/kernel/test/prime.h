@@ -1,3 +1,3 @@
 #pragma once
 
-void prime_screen(void);
+void prime_screen_render(void);

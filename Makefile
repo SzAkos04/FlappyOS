@@ -1,9 +1,9 @@
 PROJECT := SillyOS
 ASM := nasm
-CC := gcc
-CFLAGS := -m32 -ffreestanding -fno-pie -fno-builtin -fno-stack-protector -nostdlib -Isrc/libc
-LD := ld
-LDFLAGS := -melf_i386 -Ttext 0x1000 --oformat binary
+CC := i686-elf-gcc
+CFLAGS := -ffreestanding -fno-pie -fno-builtin -fno-stack-protector -nostdlib -Isrc/libc
+LD := i686-elf-ld
+LDFLAGS := -Ttext 0x1000 --oformat binary
 QEMU := qemu-system-i386
 QEMUFLAGS_DEFAULT := -drive if=floppy,format=raw
 QEMUFLAGS := --no-reboot

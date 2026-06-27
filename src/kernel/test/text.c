@@ -3,7 +3,7 @@
 #include "../font.h"
 #include "../screen.h"
 
-void text_screen(void) {
+void text_screen_render(void) {
     int x = 0;
     int y = 0;
     for (int i = 32; i <= 126; ++i) {

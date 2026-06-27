@@ -10,6 +10,8 @@
 #define KEY_LEFT 0x4B
 #define KEY_RIGHT 0x4D
 
+#define KEY_SPACE 0x39
+
 void keyboard_init(void);
 
 bool key_down(uint8_t scancode);

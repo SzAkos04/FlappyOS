@@ -15,7 +15,7 @@ bool is_prime(int n) {
     return true;
 }
 
-void prime_screen(void) {
+void prime_screen_render(void) {
     for (int y = 0; y < SCREEN_HEIGHT; ++y) {
         for (int x = 0; x < SCREEN_WIDTH; ++x) {
             if (is_prime(y * SCREEN_WIDTH + x)) {
