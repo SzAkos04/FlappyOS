@@ -130,7 +130,7 @@ void flappy_update(State *s) {
     if (!s->started) {
         if (key_down(KEY_SPACE)) {
             s->started = true;
-            prev_space = 0; // Jump instantly on frame 1
+            prev_space = 0; // jump instantly on frame 1
         }
         return;
     }
@@ -165,12 +165,11 @@ void flappy_update(State *s) {
         s->player.y = SCREEN_HEIGHT / 2;
         s->player.isAlive = true;
         s->points = 0;
-        prev_space = 0; // Jump instantly on restart frame
+        prev_space = 0; // jump instantly on restart frame
 
         return;
     }
 
-    // 3. Normal Gameplay Update Logic
     int space = key_down(KEY_SPACE);
 
     if (space && !prev_space) {

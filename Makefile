@@ -1,4 +1,4 @@
-PROJECT := SillyOS
+PROJECT := FlappyOS
 ASM := nasm
 CC := i686-elf-gcc
 CFLAGS := -ffreestanding -fno-pie -fno-builtin -fno-stack-protector -nostdlib -Isrc/libc
