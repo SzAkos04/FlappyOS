@@ -12,13 +12,16 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install dependencies
+    - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential make nasm
+        sudo apt-get install -y build-essential make nasm wget tar
 
-    - name: Set up i686-elf GCC Toolchain
-      uses: lordmancer/setup-i686-elf-gcc@v1
+    - name: Download & Install i686-elf Toolchain
+      run: |
+        wget https://github.com/lordmilko/i686-elf-tools/releases/download/13.2.0/i686-elf-tools-linux.zip
+        unzip i686-elf-tools-linux.zip -d $HOME/i686-elf-tools
+        echo "$HOME/i686-elf-tools/bin" >> $GITHUB_PATH
 
     - name: Build with make
       run: make
