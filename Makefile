@@ -71,18 +71,16 @@ build: $(DISK_IMAGE)
 
 $(DISK_IMAGE): $(KERNEL_BIN)
 	@mkdir -p $(@D)
-
 	$(eval KERNEL_SECTORS := $(shell python3 -c \
 		"import math; print(math.ceil($(shell wc -c < $<) / 512))"))
-
 	@echo "  ASM     $(BOOTLOADER)"
 	$(ASM) -f bin \
 		-DKERNEL_SECTORS=$(KERNEL_SECTORS) \
 		$(BOOTLOADER) \
 		-o $(BOOTLOADER_BIN)
-
 	@echo "  IMAGE   $@"
 	cat $(BOOTLOADER_BIN) $(KERNEL_BIN) > $@
+	truncate -s $$((512 * (1 + $(KERNEL_SECTORS)))) $@
 
 
 $(BUILD_DIR)/boot/kernel_entry.o: $(KERNEL_ENTRY)
