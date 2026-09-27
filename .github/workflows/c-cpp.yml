@@ -2,9 +2,9 @@ name: C/C++ CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 concurrency:
@@ -18,13 +18,21 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential make nasm unzip wget qemu-system-x86
+          sudo apt-get install -y \
+            build-essential \
+            make \
+            nasm \
+            unzip \
+            wget \
+            qemu-system-x86
 
       - name: Cache i686-elf toolchain
         id: cache-toolchain
@@ -33,45 +41,79 @@ jobs:
           path: ~/i686-elf-tools
           key: i686-elf-tools-${{ env.TOOLCHAIN_VERSION }}
 
-      - name: Download & Install i686-elf Toolchain
+      - name: Download & install i686-elf toolchain
         if: steps.cache-toolchain.outputs.cache-hit != 'true'
         run: |
-          wget -q "${{ env.TOOLCHAIN_URL }}" -O i686-elf-tools-linux.zip
-          unzip -q i686-elf-tools-linux.zip -d "$HOME/i686-elf-tools"
+          wget -q "${{ env.TOOLCHAIN_URL }}" \
+            -O i686-elf-tools-linux.zip
+
+          unzip -q i686-elf-tools-linux.zip \
+            -d "$HOME/i686-elf-tools"
 
       - name: Add toolchain to PATH
         run: echo "$HOME/i686-elf-tools/bin" >> "$GITHUB_PATH"
 
-      - name: Build with make
+      - name: Build
         run: make
 
-      - name: Verify boot image fits on a 1.44MB floppy
+      - name: Verify disk image
         run: |
-          SIZE=$(wc -c < build/boot/boot.img)
-          LIMIT=1474560
-          echo "boot.img size: $SIZE bytes (limit: $LIMIT)"
-          if [ "$SIZE" -gt "$LIMIT" ]; then
-            echo "::error::boot.img ($SIZE bytes) exceeds 1.44MB floppy limit ($LIMIT bytes)"
+          IMAGE="build/flappyos.img"
+
+          if [ ! -f "$IMAGE" ]; then
+            echo "::error::Disk image was not created: $IMAGE"
             exit 1
           fi
 
-      - name: Smoke test in QEMU (boot without crashing)
+          SIZE=$(wc -c < "$IMAGE")
+
+          echo "Disk image: $IMAGE"
+          echo "Size: $SIZE bytes"
+
+          if [ "$SIZE" -lt 512 ]; then
+            echo "::error::Disk image is smaller than one boot sector"
+            exit 1
+          fi
+
+          if [ $((SIZE % 512)) -ne 0 ]; then
+            echo "::error::Disk image size is not aligned to a 512-byte sector"
+            exit 1
+          fi
+
+      - name: Verify boot signature
+        run: |
+          IMAGE="build/flappyos.img"
+
+          SIGNATURE=$(xxd -p -s 510 -l 2 "$IMAGE")
+
+          echo "Boot signature: 0x$SIGNATURE"
+
+          if [ "$SIGNATURE" != "55aa" ]; then
+            echo "::error::Invalid boot signature: expected 55aa at offset 510"
+            exit 1
+          fi
+
+      - name: Smoke test in QEMU
         run: |
           timeout 5s qemu-system-i386 \
-            -drive if=floppy,format=raw,file=build/boot/boot.img \
+            -drive format=raw,file=build/flappyos.img \
             -display none \
             -no-reboot \
-            -d int,cpu_reset -D qemu.log || true
-          echo "--- QEMU log (interrupt/reset trace) ---"
+            -no-shutdown \
+            -d int,cpu_reset \
+            -D qemu.log || true
+
+          echo "--- QEMU log ---"
           cat qemu.log || true
+
           if grep -qi "triple fault\|check_exception" qemu.log 2>/dev/null; then
             echo "::error::Triple fault or unexpected exception detected during boot"
             exit 1
           fi
 
-      - name: Upload boot image artifact
+      - name: Upload disk image
         uses: actions/upload-artifact@v4
         with:
-          name: FlappyOS-boot-img
-          path: build/boot/boot.img
+          name: FlappyOS-disk-image
+          path: build/flappyos.img
           retention-days: 14
