@@ -1,8 +1,9 @@
 #include "irq.h"
 
-#include "../arch/i386/cpu.h"
-#include "../arch/i386/io.h"
 #include "isr.h"
+
+#include <cpu.h>
+#include <io.h>
 
 // PIC constants
 #define PIC1 0x20

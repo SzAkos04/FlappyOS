@@ -1,6 +1,5 @@
 #include "vga.h"
 
-#include "../arch/i386/io.h"
 #include "../graphics/font.h"
 
 #include <cctype.h>
@@ -8,6 +7,7 @@
 #include <cstdbool.h>
 #include <cstdint.h>
 #include <cstring.h>
+#include <io.h>
 
 #define VIDEO_ADDRESS 0xa0000
 

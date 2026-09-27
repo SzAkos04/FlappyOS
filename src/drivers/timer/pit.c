@@ -1,8 +1,9 @@
 #include "pit.h"
 
-#include "../arch/i386/io.h"
 #include "../interrupts/irq.h"
 #include "../interrupts/isr.h"
+
+#include <io.h>
 
 #define PIT_CHANNEL_0 0x40
 #define PIT_CONTROL_REG 0x43

@@ -18,7 +18,7 @@ void panic(const char *msg, struct Registers *regs) {
 
     char buf[32];
     print_string("EIP:", point_new(0, 30), WHITE);
-    utoa(regs->eip, buf);
+    utoa(REG_IP(regs), buf);
     print_string(buf, point_new(40, 30), WHITE);
 
     print_string("ERR:", point_new(0, 40), WHITE);

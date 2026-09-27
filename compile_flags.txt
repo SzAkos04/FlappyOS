@@ -3,3 +3,4 @@
  -fno-builtin
  -nostdlib
  -Isrc/libc
+ -Isrc/arch/i386

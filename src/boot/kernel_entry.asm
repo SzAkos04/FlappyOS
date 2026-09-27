@@ -5,7 +5,7 @@ extern _main_c
 
 section .text.kernel_entry
 
-kernel_entry:
+_start:
 	call _main_c
 
 .hang:

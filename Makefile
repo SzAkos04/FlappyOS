@@ -1,19 +1,37 @@
 PROJECT := FlappyOS
 
+ARCH ?= i386
 
 ASM := nasm
-CC := i686-elf-gcc
-LD := i686-elf-ld
-QEMU := qemu-system-i386
-
 
 SRC_DIR := src
 BUILD_DIR := build
 
 BOOT_DIR := $(SRC_DIR)/boot
-ARCH_DIR := $(SRC_DIR)/arch/i386
+ARCH_DIR := $(SRC_DIR)/arch/$(ARCH)
 KERNEL_DIR := $(SRC_DIR)/kernel
 INTERRUPTS_DIR := $(SRC_DIR)/interrupts
+
+
+ifeq ($(ARCH),i386)
+
+	CC := i686-elf-gcc
+	LD := i686-elf-ld
+	QEMU := qemu-system-i386
+	ASM_FORMAT := elf32
+
+else ifeq ($(ARCH),x86_64)
+
+	CC := x86_64-elf-gcc
+	LD := x86_64-elf-ld
+	QEMU := qemu-system-x86_64
+	ASM_FORMAT := elf64
+
+else
+
+	$(error Unsupported ARCH '$(ARCH)'. Use ARCH=i386 or ARCH=x86_64)
+
+endif
 
 
 CFLAGS := \
@@ -22,7 +40,8 @@ CFLAGS := \
 	-fno-builtin \
 	-fno-stack-protector \
 	-nostdlib \
-	-Isrc/libc
+	-Isrc/libc \
+	-I$(ARCH_DIR)
 
 LDFLAGS := \
 	-T linker.ld \
@@ -71,28 +90,35 @@ build: $(DISK_IMAGE)
 
 $(DISK_IMAGE): $(KERNEL_BIN)
 	@mkdir -p $(@D)
+
 	$(eval KERNEL_SECTORS := $(shell python3 -c \
 		"import math; print(math.ceil($(shell wc -c < $<) / 512))"))
+
+	@echo "  ARCH    $(ARCH)"
 	@echo "  ASM     $(BOOTLOADER)"
+
 	$(ASM) -f bin \
 		-DKERNEL_SECTORS=$(KERNEL_SECTORS) \
 		$(BOOTLOADER) \
 		-o $(BOOTLOADER_BIN)
+
 	@echo "  IMAGE   $@"
+
 	cat $(BOOTLOADER_BIN) $(KERNEL_BIN) > $@
+
 	truncate -s $$((512 * (1 + $(KERNEL_SECTORS)))) $@
 
 
 $(BUILD_DIR)/boot/kernel_entry.o: $(KERNEL_ENTRY)
 	@mkdir -p $(@D)
 	@echo "  ASM     $<"
-	$(ASM) -f elf32 $< -o $@
+	$(ASM) -f $(ASM_FORMAT) $< -o $@
 
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.asm
 	@mkdir -p $(@D)
 	@echo "  ASM     $<"
-	$(ASM) -f elf32 $< -o $@
+	$(ASM) -f $(ASM_FORMAT) $< -o $@
 
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
