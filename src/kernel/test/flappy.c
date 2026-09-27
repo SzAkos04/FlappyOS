@@ -18,6 +18,7 @@ void state_init(State *state) {
     state->player.isAlive = true;
     state->player.x = SCREEN_WIDTH / 2;
     state->player.y = SCREEN_HEIGHT / 2;
+    state->player.v = 0;
 
     state->points = 0;
     state->max_points = 0;
@@ -139,10 +140,9 @@ void flappy_update(State *s) {
     const int jump_a = -6;
 
     int pipe_v = -5;
-    static int player_v = 0;
 
     if (!s->player.isAlive) {
-        player_v = 0;
+        s->player.v = 0;
         pipe_v = 0;
 
         if (s->max_points < s->points) {
@@ -173,16 +173,16 @@ void flappy_update(State *s) {
     int space = key_down(KEY_SPACE);
 
     if (space && !prev_space) {
-        player_v = jump_a;
+        s->player.v = jump_a;
     }
 
     prev_space = space;
 
-    s->player.y += player_v;
-    player_v += gravity;
+    s->player.y += s->player.v;
+    s->player.v += gravity;
 
-    if (player_v > 8) {
-        player_v = 8;
+    if (s->player.v > 8) {
+        s->player.v = 8;
     }
 
     if (s->player.y + PLAYER_H / 2 >= SCREEN_HEIGHT) {

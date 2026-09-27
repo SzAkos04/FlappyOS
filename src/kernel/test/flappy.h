@@ -12,6 +12,7 @@
 
 typedef struct {
     int x, y;
+    int v;
     bool isAlive;
 } Player;
 
