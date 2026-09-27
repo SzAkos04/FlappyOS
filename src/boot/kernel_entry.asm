@@ -1,7 +1,14 @@
-[bits   32]
-[global _start]
-[extern _main_c]
+[bits 32]
 
-_start:
+global _start
+extern _main_c
+
+section .text.kernel_entry
+
+kernel_entry:
 	call _main_c
-	jmp  $
+
+.hang:
+	cli
+	hlt
+	jmp .hang

@@ -25,16 +25,17 @@ CFLAGS := \
 	-Isrc/libc
 
 LDFLAGS := \
-	-Ttext 0x1000 \
+	-T linker.ld \
 	--oformat binary
 
 QEMUFLAGS := \
-	--no-reboot \
-	-drive if=floppy,format=raw
+	-no-reboot \
+	-drive format=raw
 
 
 BOOTLOADER := $(BOOT_DIR)/boot.asm
 KERNEL_ENTRY := $(BOOT_DIR)/kernel_entry.asm
+
 
 C_SRC := $(shell find $(SRC_DIR) \
 	-type f \
@@ -47,6 +48,7 @@ KERNEL_ASM := $(shell find \
 	-type f \
 	-name '*.asm')
 
+
 OBJ := $(BUILD_DIR)/boot/kernel_entry.o
 
 OBJ += $(patsubst $(SRC_DIR)/%.asm,$(BUILD_DIR)/%.o,\
@@ -54,9 +56,9 @@ OBJ += $(patsubst $(SRC_DIR)/%.asm,$(BUILD_DIR)/%.o,\
 
 OBJ += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(C_SRC))
 
-# final image files.
+
 KERNEL_BIN := $(BUILD_DIR)/kernel.bin
-BOOT_IMAGE := $(BUILD_DIR)/boot/boot.img
+DISK_IMAGE := $(BUILD_DIR)/flappyos.img
 BOOTLOADER_BIN := $(BUILD_DIR)/bootloader.bin
 
 
@@ -64,10 +66,10 @@ BOOTLOADER_BIN := $(BUILD_DIR)/bootloader.bin
 
 all: build
 
-build: $(BOOT_IMAGE)
+build: $(DISK_IMAGE)
 
 
-$(BOOT_IMAGE): $(KERNEL_BIN)
+$(DISK_IMAGE): $(KERNEL_BIN)
 	@mkdir -p $(@D)
 
 	$(eval KERNEL_SECTORS := $(shell python3 -c \
@@ -107,7 +109,7 @@ $(KERNEL_BIN): $(OBJ)
 	$(LD) $(LDFLAGS) $^ -o $@
 
 
-run: $(BOOT_IMAGE)
+run: $(DISK_IMAGE)
 	@echo "  QEMU    $<"
 	$(QEMU) $(QEMUFLAGS),file=$<
 

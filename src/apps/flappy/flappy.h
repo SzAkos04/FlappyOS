@@ -1,7 +1,6 @@
 #pragma once
 
-#include "cstdbool.h"
-#include "cstdint.h"
+#include <cstdbool.h>
 
 #define PLAYER_H 15
 #define PLAYER_W 15

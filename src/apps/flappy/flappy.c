@@ -5,6 +5,7 @@
 #include "../drivers/video/vga.h"
 #include "../graphics/font.h"
 #include "../lib/rng.h"
+
 #include <cstdbool.h>
 #include <cstring.h>
 

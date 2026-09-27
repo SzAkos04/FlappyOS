@@ -1,7 +1,8 @@
 #include "wait.h"
 
-#include "cstdint.h"
 #include "pit.h"
+
+#include <cstdint.h>
 
 void wait_ticks(uint32_t ticks) {
     uint32_t start = timer_get();

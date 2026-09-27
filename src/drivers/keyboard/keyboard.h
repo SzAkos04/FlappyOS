@@ -1,7 +1,7 @@
 #pragma once
 
-#include "cstdbool.h"
-#include "cstdint.h"
+#include <cstdbool.h>
+#include <cstdint.h>
 
 #define KEY_W 0x11
 #define KEY_S 0x1F

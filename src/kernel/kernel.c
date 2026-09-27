@@ -1,3 +1,4 @@
+#include "../apps/flappy/flappy.h"
 #include "../drivers/keyboard/keyboard.h"
 #include "../drivers/timer/pit.h"
 #include "../drivers/video/vga.h"
@@ -5,9 +6,8 @@
 #include "../interrupts/irq.h"
 #include "../interrupts/isr.h"
 #include "../lib/rng.h"
-#include "cstring.h"
 
-#include "../apps/flappy/flappy.h"
+#include <cstring.h>
 
 #define FPS 30
 

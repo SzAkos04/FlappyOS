@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cstdint.h"
+#include <cstdint.h>
 
 void wait_ticks(uint32_t ticks);
 void wait_ms(uint32_t ms);

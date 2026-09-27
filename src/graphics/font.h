@@ -1,8 +1,8 @@
 #pragma once
 
-#include "cstring.h"
-
 #include <cstdint.h>
+#include <cstring.h>
+
 #define FONT_SIZE 8
 
 #define TEXT_WIDTH(str) strlen(str) * FONT_SIZE
