@@ -1,6 +1,6 @@
-#include "../screen.h"
-#include "./prime.h"
+#include "prime.h"
 
+#include "../drivers/video/vga.h"
 #include <cstdbool.h>
 
 bool is_prime(int n) {

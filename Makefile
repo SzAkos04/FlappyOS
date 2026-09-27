@@ -1,64 +1,116 @@
 PROJECT := FlappyOS
+
+
 ASM := nasm
 CC := i686-elf-gcc
-CFLAGS := -ffreestanding -fno-pie -fno-builtin -fno-stack-protector -nostdlib -Isrc/libc
 LD := i686-elf-ld
-LDFLAGS := -Ttext 0x1000 --oformat binary
 QEMU := qemu-system-i386
-QEMUFLAGS_DEFAULT := -drive if=floppy,format=raw
-QEMUFLAGS := --no-reboot
+
+
 SRC_DIR := src
 BUILD_DIR := build
-C_SRC := $(shell find $(SRC_DIR) -type f -name '*.c')
-# this must be first, otherwise it breaks during linking
-OBJ := $(BUILD_DIR)/kernel_entry.o
-OBJ += $(BUILD_DIR)/kernel/idt_load.o
-OBJ += $(BUILD_DIR)/kernel/interrupts.o
-OBJ += $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(C_SRC))
-BOOTLOADER := $(SRC_DIR)/bootloader.asm
-KERNEL_ENTRY := $(SRC_DIR)/kernel/kernel_entry.asm
-ISO := $(BUILD_DIR)/boot/boot.img
+
+BOOT_DIR := $(SRC_DIR)/boot
+ARCH_DIR := $(SRC_DIR)/arch/i386
+KERNEL_DIR := $(SRC_DIR)/kernel
+INTERRUPTS_DIR := $(SRC_DIR)/interrupts
+
+
+CFLAGS := \
+	-ffreestanding \
+	-fno-pie \
+	-fno-builtin \
+	-fno-stack-protector \
+	-nostdlib \
+	-Isrc/libc
+
+LDFLAGS := \
+	-Ttext 0x1000 \
+	--oformat binary
+
+QEMUFLAGS := \
+	--no-reboot \
+	-drive if=floppy,format=raw
+
+
+BOOTLOADER := $(BOOT_DIR)/boot.asm
+KERNEL_ENTRY := $(BOOT_DIR)/kernel_entry.asm
+
+C_SRC := $(shell find $(SRC_DIR) \
+	-type f \
+	-name '*.c')
+
+KERNEL_ASM := $(shell find \
+	$(ARCH_DIR) \
+	$(KERNEL_DIR) \
+	$(INTERRUPTS_DIR) \
+	-type f \
+	-name '*.asm')
+
+OBJ := $(BUILD_DIR)/boot/kernel_entry.o
+
+OBJ += $(patsubst $(SRC_DIR)/%.asm,$(BUILD_DIR)/%.o,\
+	$(filter-out $(KERNEL_ENTRY),$(KERNEL_ASM)))
+
+OBJ += $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(C_SRC))
+
+# final image files.
+KERNEL_BIN := $(BUILD_DIR)/kernel.bin
+BOOT_IMAGE := $(BUILD_DIR)/boot/boot.img
+BOOTLOADER_BIN := $(BUILD_DIR)/bootloader.bin
+
+
 .PHONY: all build run clean
 
 all: build
 
-build: $(ISO)
+build: $(BOOT_IMAGE)
 
-$(ISO): $(BUILD_DIR)/kernel.bin
-	@mkdir -p $(@D)
-	$(eval SECTORS:= $(shell python3 -c "import math; print(math.ceil($(shell wc -c < $<) / 512))"))
-	$(ASM) -f bin -DKERNEL_SECTORS=$(SECTORS) $(BOOTLOADER) -o $(BUILD_DIR)/bootloader.bin
-	cat $(BUILD_DIR)/bootloader.bin $< > $@
 
-# compile the kernel entry
-$(BUILD_DIR)/kernel_entry.o: $(KERNEL_ENTRY)
+$(BOOT_IMAGE): $(KERNEL_BIN)
 	@mkdir -p $(@D)
+
+	$(eval KERNEL_SECTORS := $(shell python3 -c \
+		"import math; print(math.ceil($(shell wc -c < $<) / 512))"))
+
+	@echo "  ASM     $(BOOTLOADER)"
+	$(ASM) -f bin \
+		-DKERNEL_SECTORS=$(KERNEL_SECTORS) \
+		$(BOOTLOADER) \
+		-o $(BOOTLOADER_BIN)
+
+	@echo "  IMAGE   $@"
+	cat $(BOOTLOADER_BIN) $(KERNEL_BIN) > $@
+
+
+$(BUILD_DIR)/boot/kernel_entry.o: $(KERNEL_ENTRY)
+	@mkdir -p $(@D)
+	@echo "  ASM     $<"
 	$(ASM) -f elf32 $< -o $@
 
-# compile idt_load
-$(BUILD_DIR)/kernel/idt_load.o: $(SRC_DIR)/kernel/idt_load.asm
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.asm
 	@mkdir -p $(@D)
+	@echo "  ASM     $<"
 	$(ASM) -f elf32 $< -o $@
 
-# compile interrupts
-$(BUILD_DIR)/kernel/interrupts.o: $(SRC_DIR)/kernel/interrupts.asm
-	@mkdir -p $(@D)
-	$(ASM) -f elf32 $< -o $@
 
-# compile the kernel
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(@D)
+	@echo "  CC      $<"
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# link the kernel
-$(BUILD_DIR)/kernel.bin: $(OBJ)
+
+$(KERNEL_BIN): $(OBJ)
 	@mkdir -p $(@D)
+	@echo "  LD      $@"
 	$(LD) $(LDFLAGS) $^ -o $@
 
-run: $(ISO)
-	$(QEMU) $(QEMUFLAGS) $(QEMUFLAGS_DEFAULT),file=$<
+
+run: $(BOOT_IMAGE)
+	@echo "  QEMU    $<"
+	$(QEMU) $(QEMUFLAGS),file=$<
+
 
 clean:
 	rm -rf $(BUILD_DIR)
-
-

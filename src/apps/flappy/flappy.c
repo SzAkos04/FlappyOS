@@ -1,12 +1,12 @@
 #include "flappy.h"
 
-#include "../font.h"
-#include "../helpers/rng.h"
-#include "../helpers/wait.h"
-#include "../keyboard.h"
-#include "../screen.h"
-#include "cstdbool.h"
-#include "cstring.h"
+#include "../drivers/keyboard/keyboard.h"
+#include "../drivers/timer/wait.h"
+#include "../drivers/video/vga.h"
+#include "../graphics/font.h"
+#include "../lib/rng.h"
+#include <cstdbool.h>
+#include <cstring.h>
 
 static int prev_space = 0;
 

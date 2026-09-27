@@ -1,7 +1,7 @@
 #include "wait.h"
 
-#include "../timer.h"
 #include "cstdint.h"
+#include "pit.h"
 
 void wait_ticks(uint32_t ticks) {
     uint32_t start = timer_get();
@@ -11,9 +11,9 @@ void wait_ticks(uint32_t ticks) {
 }
 
 void wait_ms(uint32_t ms) {
-    // Compute ceil(ms * TIMER_FREQ / 1000) without using 64-bit division.
-    // Let ms = a*1000 + b where a = ms/1000 and b = ms%1000.
-    // Then ticks = a*TIMER_FREQ + ceil(b*TIMER_FREQ/1000)
+    // compute ceil(ms * TIMER_FREQ / 1000) without using 64-bit division.
+    // let ms = a*1000 + b where a = ms/1000 and b = ms%1000.
+    // then ticks = a*TIMER_FREQ + ceil(b*TIMER_FREQ/1000)
     uint32_t a = ms / 1000;
     uint32_t b = ms % 1000;
 

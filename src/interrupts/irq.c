@@ -1,7 +1,8 @@
 #include "irq.h"
 
+#include "../arch/i386/cpu.h"
+#include "../arch/i386/io.h"
 #include "isr.h"
-#include "utils.h"
 
 // PIC constants
 #define PIC1 0x20
@@ -60,17 +61,17 @@ static void irq_clear_mask(size_t i) {
 }
 
 void irq_install(size_t i, void (*handler)(struct Registers *)) {
-    CLI();
+    cpu_cli();
     irq_handlers[i] = handler;
     irq_clear_mask(i);
-    STI();
+    cpu_sti();
 }
 
 void irq_uninstall(size_t i) {
-    CLI();
+    cpu_cli();
     irq_set_mask(i);
     irq_handlers[i] = 0;
-    STI();
+    cpu_sti();
 }
 
 void irq_init(void) {

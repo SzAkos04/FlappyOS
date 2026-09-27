@@ -1,13 +1,13 @@
+#include "../drivers/keyboard/keyboard.h"
+#include "../drivers/timer/pit.h"
+#include "../drivers/video/vga.h"
+#include "../interrupts/idt.h"
+#include "../interrupts/irq.h"
+#include "../interrupts/isr.h"
+#include "../lib/rng.h"
 #include "cstring.h"
-#include "helpers/rng.h"
-#include "idt.h"
-#include "irq.h"
-#include "isr.h"
-#include "keyboard.h"
-#include "screen.h"
-#include "timer.h"
 
-#include "test/flappy.h"
+#include "../apps/flappy/flappy.h"
 
 #define FPS 30
 

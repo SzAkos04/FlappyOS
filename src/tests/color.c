@@ -1,6 +1,6 @@
-#include "./color.h"
+#include "color.h"
 
-#include "../screen.h"
+#include "../drivers/video/vga.h"
 
 void color_screen(void) {
     static int offset = 0;

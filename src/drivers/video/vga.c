@@ -1,7 +1,7 @@
-#include "screen.h"
+#include "vga.h"
 
-#include "font.h"
-#include "utils.h"
+#include "../arch/i386/io.h"
+#include "../graphics/font.h"
 
 #include <cctype.h>
 #include <cmath.h>

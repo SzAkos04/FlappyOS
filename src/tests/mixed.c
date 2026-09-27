@@ -1,7 +1,7 @@
-#include "./mixed.h"
+#include "mixed.h"
 
-#include "../font.h"
-#include "../screen.h"
+#include "../drivers/video/vga.h"
+#include "../graphics/font.h"
 
 void mixed_screen_render(void) {
     draw_rect(point_new(25, 50), point_new(75, 100), MAGENTA);

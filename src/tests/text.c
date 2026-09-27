@@ -1,7 +1,7 @@
-#include "./text.h"
+#include "text.h"
 
-#include "../font.h"
-#include "../screen.h"
+#include "../drivers/video/vga.h"
+#include "../graphics/font.h"
 
 void text_screen_render(void) {
     int x = 0;

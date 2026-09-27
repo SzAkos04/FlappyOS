@@ -2,10 +2,6 @@
 
 #include <cstdint.h>
 
-#define asm __asm__
-#define CLI() asm("cli")
-#define STI() asm("sti")
-
 typedef unsigned char byte;
 
 byte inportb(uint16_t port);

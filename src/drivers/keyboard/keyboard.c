@@ -1,8 +1,9 @@
 #include "keyboard.h"
 
+#include "../arch/i386/io.h"
+#include "../interrupts/irq.h"
+
 #include "cstdbool.h"
-#include "irq.h"
-#include "utils.h"
 
 static bool keys[128] = {0};
 
