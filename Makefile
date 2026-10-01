@@ -55,6 +55,10 @@ QEMUFLAGS := \
 BOOTLOADER := $(BOOT_DIR)/boot.asm
 KERNEL_ENTRY := $(BOOT_DIR)/kernel_entry.asm
 
+ifeq ($(ARCH),x86_64)
+	KERNEL_ENTRY := $(BOOT_DIR)/kernel_entry64.asm
+endif
+
 
 C_SRC := $(shell find $(SRC_DIR) \
 	-type f \
